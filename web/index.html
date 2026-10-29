@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Shiny via plumber2</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; }
+    iframe { width: 100%; height: 600px; border: 1px solid #ccc; }
+    input { width: 28rem; }
+  </style>
+</head>
+<body>
+  <h1>Shiny app served by plumber2</h1>
+
+  <p>
+    <label>API URL:<br>
+      <input id="api" placeholder="https://connect.example.com/content/<guid>">
+    </label>
+  </p>
+  <p>
+    <label>API key (optional, checks the key against /health):<br>
+      <input id="key" type="password" placeholder="Connect API key">
+    </label>
+  </p>
+  <button id="load">Load app</button>
+  <p id="status"></p>
+
+  <iframe id="frame" title="Shiny app"></iframe>
+
+  <script>
+    document.getElementById("load").addEventListener("click", async () => {
+      const api = document.getElementById("api").value.replace(/\/$/, "");
+      const key = document.getElementById("key").value;
+      const status = document.getElementById("status");
+
+      if (key) {
+        try {
+          const resp = await fetch(api + "/health", {
+            headers: { Authorization: "Key " + key }
+          });
+          if (!resp.ok) throw new Error("API returned " + resp.status);
+        } catch (err) {
+          status.textContent = "Key check failed: " + err.message;
+          return;
+        }
+      }
+
+      // An iframe can't send the API key; on Connect it relies on the viewer's login session.
+      document.getElementById("frame").src = api + "/my_app/";
+      status.textContent = "Loaded " + api + "/my_app/";
+    });
+  </script>
+</body>
+</html>

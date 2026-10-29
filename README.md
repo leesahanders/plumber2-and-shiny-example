@@ -1,5 +1,7 @@
 # plumber2-and-shiny-example
 
+> Disclaimer: Created initially by Claude
+
 A minimal example of serving a Shiny app from a plumber2 API, deployed to Posit Connect with API-key authentication, plus an HTML page that displays the app. Tested locally; not yet deployed to Connect.
 
 Classic plumber can't serve Shiny because it has no WebSocket support, and Shiny needs WebSockets. plumber2 can: its `@shiny` tag (or `api_shiny()`) runs the app in a background process and reverse-proxies HTTP and WebSocket traffic to it.

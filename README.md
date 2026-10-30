@@ -32,3 +32,7 @@ Now, while the portions at the top are accessed via API key and therefore theore
 **Project 3: Shinylive dashboard as static content**
 
 Shiny running entirely in the browser via WebAssembly, with no R server at all. It requires setting the site’s access to “Anyone - no login required”. If it is behind a login then the service worker's redirect for auth is broken. 
+
+This one is my favorite - check out what it looks like: 
+
+![shinylive on Connect demo](/img/shinylive-demo-2026-10-30.gif "shinylive on Connect demo")

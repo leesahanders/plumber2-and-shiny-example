@@ -11,9 +11,13 @@ A mock-up dashboard where an HTML page gets all its data and plots from a plumbe
   - `GET /summary?days=90` returns JSON for the summary tiles.
   - `GET /plot/trend`, `/plot/pressure` and `/plot/scatter`, each with `?days=90`, return PNG plots.
   - `days` must be between 10 and 365; other values get a 400 error.
+  - `GET /live` returns the current simulated flow rate, which changes every second.
   - `/my_app/` serves the Shiny app.
 - `plumber2/shiny/app.R` is the Shiny app.
-- `web/index.html` is the dashboard page. The slider re-fetches the tiles and plots when you release it.
+- `web/index.html` is the dashboard page:
+  - A live widget calls `/live` every second and updates the reading and a one-minute sparkline in place, without reloading the page.
+  - The slider re-fetches the tiles and plots when you release it.
+  - It remembers the connection, so a reload reconnects without asking again. The API URL is kept in `localStorage`, which survives browser restarts. The key is kept in `sessionStorage`, which lasts until the tab closes, so a kiosk that restarts its browser needs the key re-entered.
 
 ## Why the Shiny part needs a login
 
@@ -48,6 +52,8 @@ Requires Connect 2025.06.0 or later. Run from this folder, with your Connect ser
 
 ## Caveats
 
+- **Browser storage is shared across the Connect server.** Any page on the same Connect server can read `localStorage`, which is why only the URL goes there. `sessionStorage` is limited to this tab, but another Connect page opened in the same tab could still read the key.
+- **The live widget makes one API request per second per open page.** That's fine for a kiosk or two; for many viewers, slow it down or switch to a push mechanism.
 - **The key is visible to anyone who can open the page.** The user types it in this mock-up; if you embed it in the HTML instead, anyone who can view the page can read it. Use a key from a low-privilege account.
 - **Licensing:** before using this pattern to give people without Connect accounts access to interactive content, check it against Connect's licensing. Anonymous access to interactive content normally requires the Public Access entitlement.
 - **plumber2's Shiny proxy is young.** In local testing the Shiny slider once failed to load its JavaScript, and a reload fixed it. It didn't happen again in four more reloads.

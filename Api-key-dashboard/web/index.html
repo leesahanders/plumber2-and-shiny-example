@@ -27,6 +27,15 @@
     <span id="status"></span>
   </fieldset>
 
+  <h2>Live flow rate (updates every second)</h2>
+  <div class="tile">
+    <div class="value"><span id="flow_rate">–</span> bbl/h</div>
+    Last reading: <span id="live_time">–</span> <span id="live_status"></span>
+    <svg viewBox="0 0 300 60" preserveAspectRatio="none" width="100%" height="60">
+      <polyline id="spark" fill="none" stroke="#2a6ebb" stroke-width="2"></polyline>
+    </svg>
+  </div>
+
   <h2>Production (served by the API, using the API key)</h2>
   <p>
     <label>Days of data: <strong id="days-label">90</strong><br>
@@ -88,7 +97,54 @@
       }
     }
 
-    $("connect").addEventListener("click", refresh);
+    // Live widget: poll /live every second and update in place, without reloading
+    // the page. Skips a tick if the previous request hasn't finished or the tab is hidden.
+    const readings = [];
+    let live = false, liveBusy = false;
+
+    async function pollLive() {
+      if (!live || liveBusy || document.hidden) return;
+      liveBusy = true;
+      try {
+        const reading = await (await apiGet("/live")).json();
+        $("flow_rate").textContent = reading.flow_rate;
+        $("live_time").textContent = reading.time;
+        $("live_status").textContent = "";
+        readings.push(reading.flow_rate);
+        if (readings.length > 60) readings.shift();
+        drawSparkline();
+      } catch (err) {
+        $("live_status").textContent = "(failed: " + err.message + ")";
+      } finally {
+        liveBusy = false;
+      }
+    }
+
+    function drawSparkline() {
+      const min = Math.min(...readings), range = Math.max(...readings) - min || 1;
+      $("spark").setAttribute("points", readings
+        .map((v, i) => (i * 300 / 59) + "," + (58 - (v - min) / range * 56))
+        .join(" "));
+    }
+
+    setInterval(pollLive, 1000);
+
+    // Remember the connection so a page reload doesn't ask for it again. The URL is
+    // kept in localStorage (survives browser restarts). The key goes in sessionStorage,
+    // which lasts until this tab closes: browser storage is shared by every page
+    // on the same Connect server, so the key shouldn't stay there indefinitely.
+    function connect() {
+      localStorage.setItem("apiUrl", $("api").value);
+      sessionStorage.setItem("apiKey", $("key").value);
+      live = true;
+      refresh();
+    }
+
+    $("api").value = localStorage.getItem("apiUrl") || "";
+    $("key").value = sessionStorage.getItem("apiKey") || "";
+    if ($("api").value) connect();
+
+    $("connect").addEventListener("click", connect);
     $("days").addEventListener("input", () => { $("days-label").textContent = $("days").value; });
     $("days").addEventListener("change", refresh);
     $("load-shiny").addEventListener("click", () => { $("shiny").src = apiUrl() + "/my_app/"; });

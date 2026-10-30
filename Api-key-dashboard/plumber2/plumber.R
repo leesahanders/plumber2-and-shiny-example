@@ -52,6 +52,19 @@ function(query) {
   plot(d$pressure, d$output, xlab = "Pressure (psi)", ylab = "Output (bbl)", main = "Output vs pressure")
 }
 
+#* Current flow rate, for the live widget. Simulated from the clock (no random
+#* numbers), so it changes smoothly between calls.
+#* @get /live
+#* @serializer json{auto_unbox = TRUE}
+function() {
+  now <- Sys.time()
+  t <- as.numeric(now)
+  list(
+    time = format(now, "%H:%M:%S"),
+    flow_rate = round(500 + 25 * sin(t / 5) + 8 * sin(t / 1.3), 1)
+  )
+}
+
 # Everything under /my_app/ is reverse-proxied to a Shiny app that plumber2 runs
 # in a background process. "shiny" is resolved from the working directory, so
 # start the API from this folder.

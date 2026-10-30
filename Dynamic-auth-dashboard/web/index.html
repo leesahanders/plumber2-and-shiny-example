@@ -7,6 +7,7 @@
     body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; }
     iframe { width: 100%; height: 600px; border: 1px solid #ccc; }
     input { width: 28rem; }
+    footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; color: #555; }
   </style>
 </head>
 <body>
@@ -26,6 +27,10 @@
   <p id="status"></p>
 
   <iframe id="frame" title="Shiny app"></iframe>
+
+  <footer>
+    Source code: <a href="https://github.com/leesahanders/plumber2-and-shiny-example/tree/main/Dynamic-auth-dashboard" target="_blank" rel="noopener">plumber2-and-shiny-example on GitHub</a>
+  </footer>
 
   <script>
     document.getElementById("load").addEventListener("click", async () => {

@@ -39,6 +39,15 @@ ui <- fluidPage(
     column(4, plotOutput("trend", height = "280px")),
     column(4, plotOutput("pressure", height = "280px")),
     column(4, plotOutput("scatter", height = "280px"))
+  ),
+
+  # Opens in a new tab: Shinylive runs the app inside an iframe.
+  hr(),
+  p(
+    "Source code: ",
+    a("plumber2-and-shiny-example on GitHub",
+      href = "https://github.com/leesahanders/plumber2-and-shiny-example/tree/main/Shinylive-dashboard",
+      target = "_blank", rel = "noopener")
   )
 )
 

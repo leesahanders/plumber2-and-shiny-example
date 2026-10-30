@@ -29,7 +29,7 @@ It includes a widget that updates every second and draws a graph (without requir
 
 Now, while the portions at the top are accessed via API key and therefore theoretically able to be accessed on a dashboard visible on an office floor or the like, the API key is embedded in the html and therefore  visible to anyone that views the page which is a security liability and not recommended. for the case of this example it asks for an API key and URL to help prevent secrets from leaking. 
 
-**Project 3: Shinylive dashboard as static content**
+**Project 3: Shinylive-dashboard (as static content)**
 
 Shiny running entirely in the browser via WebAssembly, with no R server at all. It requires setting the site’s access to “Anyone - no login required”. If it is behind a login then the service worker's redirect for auth is broken. 
 

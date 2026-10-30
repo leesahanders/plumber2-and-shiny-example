@@ -15,7 +15,11 @@ TLDR is that while it is now possible to serve a shiny app from a plumber2 api e
 
 This project is serving just components from the plumber2 API endpoint and anything dynamic is being handled in the html page. So images, etc, are served from the plumber endpoint on Connect and then displayed inside the html page. There is a shiny app on the bottom, in order to see it the user must log in to the Connect server. 
 
+Now, while the portions at the top are accessed via API key and therefore theoretically able to be accessed on a dashboard visible on an office floor or the like, the API key is embedded in the html and therefore  visible to anyone that views the page which is a security liability and not recommended. for the case of this example it asks for an API key and URL to help prevent secrets from leaking. 
+
 **Project 2: Dynamic-auth-dashboard**
 
 This project is only serving the shiny webpage inside the html page. In  order to see it the user must log in to the Connect server. 
+
+Where the docs are: open <Content URL>/__docs__/. Click Standalone, then add __docs__/ to the end of the URL. Similarly for the shiny app it's at <Content URL>/my_app/ . 
 

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Well dashboard</title>
+  <style>
+    body { font-family: sans-serif; max-width: 1100px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    fieldset { border: 1px solid #ccc; margin-bottom: 1.5rem; }
+    input[type=text], input[type=password] { width: 28rem; }
+    .tiles { display: flex; gap: 1rem; margin: 1rem 0; }
+    .tile { flex: 1; border: 1px solid #ccc; padding: 0.75rem; }
+    .tile .value { font-size: 1.8rem; font-weight: bold; }
+    .plots { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .plots img { width: 340px; border: 1px solid #ccc; }
+    .note { background: #fff4d6; border: 1px solid #e6c56a; padding: 0.75rem; }
+    iframe { width: 100%; height: 420px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>Well dashboard (mock-up)</h1>
+
+  <fieldset>
+    <legend>Connection</legend>
+    <p><label>API URL<br><input id="api" type="text" placeholder="https://connect.example.com/content/<guid>"></label></p>
+    <p><label>API key<br><input id="key" type="password" placeholder="Connect API key"></label></p>
+    <button id="connect">Load dashboard</button>
+    <span id="status"></span>
+  </fieldset>
+
+  <h2>Production (served by the API, using the API key)</h2>
+  <p>
+    <label>Days of data: <strong id="days-label">90</strong><br>
+      <input id="days" type="range" min="10" max="365" value="90">
+    </label>
+  </p>
+
+  <div class="tiles">
+    <div class="tile">Average output<div class="value" id="avg_output">–</div>bbl/day</div>
+    <div class="tile">Latest output<div class="value" id="latest_output">–</div>bbl/day</div>
+    <div class="tile">Average pressure<div class="value" id="avg_pressure">–</div>psi</div>
+  </div>
+
+  <div class="plots">
+    <img id="trend" alt="Daily output">
+    <img id="pressure" alt="Pressure distribution">
+    <img id="scatter" alt="Output vs pressure">
+  </div>
+
+  <h2>Shiny app (Connect login required)</h2>
+  <p class="note">
+    You must be logged in to Connect in this browser to see the app below. The API key can't be used here:
+    the browser loads the Shiny app itself, and it can only send your Connect login, not an API key header.
+  </p>
+  <button id="load-shiny">Load Shiny app</button>
+  <iframe id="shiny" title="Shiny app"></iframe>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const apiUrl = () => $("api").value.replace(/\/$/, "");
+
+    // Every API call sends the key in the Authorization header, like
+    // curl -H "Authorization: Key $CONNECT_API_KEY" <url>
+    async function apiGet(path) {
+      const headers = $("key").value ? { Authorization: "Key " + $("key").value } : {};
+      const resp = await fetch(apiUrl() + path, { headers });
+      if (!resp.ok) throw new Error(path + " returned " + resp.status);
+      return resp;
+    }
+
+    async function refresh() {
+      const days = $("days").value;
+      $("status").textContent = "Loading...";
+      try {
+        const summary = await (await apiGet("/summary?days=" + days)).json();
+        for (const k of ["avg_output", "latest_output", "avg_pressure"]) {
+          $(k).textContent = summary[k].toLocaleString();
+        }
+
+        // Images can't send headers via <img src>, so fetch them and show the result.
+        for (const plot of ["trend", "pressure", "scatter"]) {
+          const blob = await (await apiGet("/plot/" + plot + "?days=" + days)).blob();
+          URL.revokeObjectURL($(plot).src);
+          $(plot).src = URL.createObjectURL(blob);
+        }
+        $("status").textContent = "Updated";
+      } catch (err) {
+        $("status").textContent = "Failed: " + err.message;
+      }
+    }
+
+    $("connect").addEventListener("click", refresh);
+    $("days").addEventListener("input", () => { $("days-label").textContent = $("days").value; });
+    $("days").addEventListener("change", refresh);
+    $("load-shiny").addEventListener("click", () => { $("shiny").src = apiUrl() + "/my_app/"; });
+  </script>
+</body>
+</html>

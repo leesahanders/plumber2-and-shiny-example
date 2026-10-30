@@ -1,3 +1,6 @@
+library(plumber2)
+library(shiny)
+
 # Send the root URL to the app, so Connect's content page shows it. The target is
 # relative because on Connect the API lives under /content/<guid>/, not at /.
 #* @redirect get / my_app/

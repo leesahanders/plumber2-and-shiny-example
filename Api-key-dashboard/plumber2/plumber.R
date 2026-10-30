@@ -1,3 +1,6 @@
+library(plumber2)
+library(shiny)
+
 # Simulated daily well data. The seed is fixed so every endpoint sees the same data.
 well_data <- function(days) {
   set.seed(1)
